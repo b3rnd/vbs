@@ -2,18 +2,19 @@
 ' https://technet.microsoft.com/en-us/library/gg702620.aspx
 ' http://community.spiceworks.com/how_to/48973-remove-and-re-add-license-key-for-office-2013-on-office-365
 
+Set objFSO = CreateObject("Scripting.FileSystemObject")
 Set objShell = WScript.CreateObject("WScript.Shell")
 
-'OS Architektur auslesen
-OsType = objShell.RegRead("HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\PROCESSOR_ARCHITECTURE")
-
-If OsType = "x86" then
-	Path = "%ProgramFiles%\Microsoft Office\Office15\ospp.vbs"
-Else 
-	Path = "%ProgramFiles(x86)%\Microsoft Office\Office15\ospp.vbs"
+If objFSO.FileExists("%ProgramFiles%\Microsoft Office\Office15\ospp.vbs") Then
+	ospp = "%ProgramFiles%\Microsoft Office\Office15\ospp.vbs"
+ElseIf  objFSO.FileExists("%ProgramFiles(x86)%\Microsoft Office\Office15\ospp.vbs") Then
+	ospp = "%ProgramFiles(x86)%\Microsoft Office\Office15\ospp.vbs"
+Else
+	Messagebox "Office is not installed!"
+	WScript.Quit
 End If
 
-Set objExec = objShell.Exec("cscript """ + Path + """ /dstatus")
+Set objExec = objShell.Exec("cscript """ + ospp + """ /dstatus")
 
 Do
 	line = objExec.StdOut.ReadLine()
@@ -26,7 +27,7 @@ Do
 			End If
 		Loop While key = ""
 		
-		Set objExec2 = objShell.Exec("cscript """ + Path + """ /unpkey:" + key)
+		Set objExec2 = objShell.Exec("cscript """ + ospp + """ /unpkey:" + key)
 		
 		do
 			line2 = objExec2.StdOut.ReadLine()
